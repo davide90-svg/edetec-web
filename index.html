@@ -480,5 +480,65 @@
             document.documentElement.lang = lang;
         });
     </script>
+
+    <div id="cookie-banner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 500px; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); padding: 25px; border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.12); z-index: 9999; border: 1px solid #e5e5ea; text-align: left; font-size: 14px; color: var(--text-light);">
+        <p style="margin-bottom: 18px; line-height: 1.6; color: var(--text-light);">
+            <strong style="display:block; font-size: 16px; margin-bottom: 8px; color: var(--text-dark); font-weight: 600;">Privacidad y Analítica</strong>
+            Utilizamos cookies de terceros (Google Analytics) exclusivamente para entender de forma anónima cómo interactúas con la web y mejorar nuestro servicio. No usamos cookies publicitarias.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+            <button id="reject-cookies" style="padding: 10px 20px; border: 1px solid var(--text-light); background: transparent; color: var(--text-dark); border-radius: 30px; cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.3s;">Solo Necesarias</button>
+            <button id="accept-cookies" style="padding: 10px 20px; border: none; background: var(--text-dark); color: #fff; border-radius: 30px; cursor: pointer; font-weight: 500; font-size: 13px; transition: opacity 0.3s;">Aceptar Todo</button>
+        </div>
+    </div>
+
+    <script>
+        // === INSERTA AQUÍ TU ID DE GOOGLE ANALYTICS ===
+        const GA_MEASUREMENT_ID = 'G-ZH54XVTSCS'; 
+        // ==============================================
+
+        const cookieBanner = document.getElementById('cookie-banner');
+        const acceptBtn = document.getElementById('accept-cookies');
+        const rejectBtn = document.getElementById('reject-cookies');
+
+        // Función que inyecta Analytics SOLO si hay permiso
+        function initGoogleAnalytics() {
+            const script = document.createElement('script');
+            script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
+            script.async = true;
+            document.head.appendChild(script);
+
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', GA_MEASUREMENT_ID, { 'anonymize_ip': true }); // Anonimización extra para RGPD
+        }
+
+        // Comprobar si el usuario ya ha votado antes
+        const cookieStatus = localStorage.getItem('edetec_cookie_consent');
+        
+        if (!cookieStatus) {
+            // Si es nuevo, mostramos el banner
+            setTimeout(() => { cookieBanner.style.display = 'block'; }, 1000);
+        } else if (cookieStatus === 'accepted') {
+            // Si ya aceptó en el pasado, cargamos GA directamente en silencio
+            initGoogleAnalytics();
+        }
+
+        // Lógica de botones
+        acceptBtn.addEventListener('click', () => {
+            localStorage.setItem('edetec_cookie_consent', 'accepted');
+            cookieBanner.style.opacity = '0';
+            setTimeout(() => { cookieBanner.style.display = 'none'; }, 300);
+            initGoogleAnalytics(); // Dispara Analytics al instante
+        });
+
+        rejectBtn.addEventListener('click', () => {
+            localStorage.setItem('edetec_cookie_consent', 'rejected');
+            cookieBanner.style.opacity = '0';
+            setTimeout(() => { cookieBanner.style.display = 'none'; }, 300);
+            // No cargamos nada
+        });
+    </script>
 </body>
 </html>
